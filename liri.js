@@ -12,20 +12,20 @@ function liriINIT(){
             name: 'command',
             message: "Which command would you like to run?",
             type: 'rawlist',
-            choices: ['concert-this', 'spotify-this-song', 'movie-this', 'do-what-it-says', 'Exit']
+            choices: ['Search for concerts by Artist', 'Search for a song by the title', 'Search for a movie by the title', 'Do something random!', 'Exit']
         }
     ]).then(response => {
         switch(response.command){
-            case 'concert-this':
+            case 'Search for concerts by Artist':
                 concertThis();
                 break;
-            case 'spotify-this-song':
+            case 'Search for a song by the title':
                 spotifyThisSong();
                 break;
             case 'movie-this':
                 movieThis();
                 break;
-            case 'do-what-it-says':
+            case 'Search for a movie by the title':
                 doWhatItSays();
                 break;
             case 'Exit':
@@ -95,6 +95,35 @@ function concertThis(){
             console.log(err);
         })
     }).catch(err => {
+        console.log(err);
+    });
+}
+
+function movieThis(){
+    inquirer.prompt([
+        {
+            name: 'movie',
+            message: "What movie would you like to search for?",
+            type: 'input',
+            default: "Mr. Nobody"
+        }
+    ]).then(res => {
+        var movieSearch = res.movie.split(' ').join('+');
+        var movieTitle;
+        axios.get("http://www.omdbapi.com/?apikey=3cb42b54&s=" + movieSearch).then(res => {
+            movieTitle = res.data.Search[0].Title;
+        }).catch(err =>{
+            console.log(err);
+        }).finally(() => {
+            axios.get("http://www.omdbapi.com/?apikey=3cb42b54&t=" + movieTitle).then(res => {
+                var movie = res.data;
+                console.log("\n```````````````\nTitle: " + movie.Title + "\nYear: " + movie.Year + "\nIMDB Rating: " + movie.Ratings[0].Value + "\nRotten Tomatoes Rating: " + movie.Ratings[1].Value + "\nCountry: " + movie.Country + "\nLanguage: " + movie.Language + "\nPlot: " + movie.Plot + "\nLeading Actors: " + movie.Actors + "\n\n```````````````");
+                liriINIT();
+            }).catch(err =>{
+                console.log(err);
+            });
+        });
+    }).catch(err =>{
         console.log(err);
     });
 }
