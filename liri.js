@@ -5,6 +5,7 @@ var inquirer = require('inquirer');
 var axios = require('axios');
 var keys = require('./keys.js');
 var spotify = new Spotify(keys.spotify);
+var fs = require('fs');
 
 function liriINIT(){
     inquirer.prompt([
@@ -22,10 +23,10 @@ function liriINIT(){
             case 'Search for a song by the title':
                 spotifyThisSong();
                 break;
-            case 'movie-this':
+            case 'Search for a movie by the title':
                 movieThis();
                 break;
-            case 'Search for a movie by the title':
+            case 'Do something random!':
                 doWhatItSays();
                 break;
             case 'Exit':
@@ -37,13 +38,13 @@ function liriINIT(){
     });
 }
 
-function spotifyThisSong(){
+function spotifyThisSong(song){
     inquirer.prompt([
         {
             name: 'song',
             message: "What song would you like to search for?",
             type: 'input',
-            default: 'The Sign - Ace of Base',
+            default: song || 'The Sign - Ace of Base',
         }
     ]).then(response => {
         spotify.search({
@@ -70,18 +71,21 @@ function spotifyThisSong(){
     }).catch(err => {
         console.log(err);
     });
+    debugger;
 }
 
-function concertThis(){
+function concertThis(artist){
     inquirer.prompt([
         {
             name: 'artist',
             message: "What artist do you want to search for?",
-            type: "input"
+            type: "input",
+            default: artist
         }
     ]).then(res => {
         var artist = res.artist.split(' ').join('+');
         axios.get('https://rest.bandsintown.com/artists/'+ artist + '/events?app_id=codingbootcamp').then(res => {
+            console.log(res);
             if(res.data.length > 0){
                 res.data.forEach(concert => {
                     console.log("\n```````````````\nVenue Name: " + concert.venue.name + "\nVenue Location: " + concert.venue.city + "\nDate: " + moment(concert.datetime).format("dddd, MMMM Do YYYY, h:mm:ss a") + "\n\n```````````````\n");
@@ -92,24 +96,24 @@ function concertThis(){
                 liriINIT();
             }
         }).catch(err => {
-            console.log(err);
+            console.log(err.response.data.errorMessage);
         })
     }).catch(err => {
         console.log(err);
     });
 }
 
-function movieThis(){
+function movieThis(movie){
     inquirer.prompt([
         {
             name: 'movie',
             message: "What movie would you like to search for?",
             type: 'input',
-            default: "Mr. Nobody"
+            default: movie || "Mr. Nobody"
         }
     ]).then(res => {
         var movieSearch = res.movie.split(' ').join('+');
-        var movieTitle;
+        var movieTitle = "Mr. Nobody";
         axios.get("http://www.omdbapi.com/?apikey=3cb42b54&s=" + movieSearch).then(res => {
             movieTitle = res.data.Search[0].Title;
         }).catch(err =>{
@@ -117,7 +121,17 @@ function movieThis(){
         }).finally(() => {
             axios.get("http://www.omdbapi.com/?apikey=3cb42b54&t=" + movieTitle).then(res => {
                 var movie = res.data;
-                console.log("\n```````````````\nTitle: " + movie.Title + "\nYear: " + movie.Year + "\nIMDB Rating: " + movie.Ratings[0].Value + "\nRotten Tomatoes Rating: " + movie.Ratings[1].Value + "\nCountry: " + movie.Country + "\nLanguage: " + movie.Language + "\nPlot: " + movie.Plot + "\nLeading Actors: " + movie.Actors + "\n\n```````````````");
+                var movieData = [
+                    `Title: ${movie.Title}`,
+                    `Year: ${movie.Year}`,
+                    `IMDB Rating: ${movie.Ratings[0] ? movie.Ratings[0].Value : "None"}`,
+                    `Rotten Tomatoes Rating: ${movie.Ratings[1] ? movie.Ratings[1].Value : "None"}`,
+                    `Country: ${movie.Country}`,
+                    `Language: ${movie.Language}`,
+                    `Plot: ${movie.Plot}`,
+                    `Actors: ${movie.Actors}`
+                ].join("\n");
+                console.log("```````````````\n" + movieData + "\n```````````````");
                 liriINIT();
             }).catch(err =>{
                 console.log(err);
@@ -128,5 +142,25 @@ function movieThis(){
     });
 }
 
+function doWhatItSays(){
+    fs.readFile('random.txt', 'utf8', (err, data) => {
+        if(err) throw err;
+        var commandLines = data.split('\r\n');
+        var randomCommand = commandLines[Math.floor(Math.random() * commandLines.length)];
+        var commandArgs = randomCommand.split(',');
+        var command = commandArgs[0];
+        var argument = commandArgs[1].replace(/"/g,"");
+        switch(command){
+            case "spotify-this-song":
+                spotifyThisSong(argument);
+                break;
+            case "concert-this":
+                concertThis(argument);
+                break;
+            case "movie-this":
+                movieThis(argument);
+        }
+    });
+}
 
 liriINIT();
