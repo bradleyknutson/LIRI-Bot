@@ -1,7 +1,7 @@
 # LIRI-Bot
 
 ## Description
-//To Do
+LIRI-Bot is a Language Interpretation and Recognition Interface bot, used exclusively to search for concerts, songs, and movies.  In this version of the bot you initialize the program and then choose your search options from Inquirer.  
 
 ## Installation
 * run `npm i` to install dependencies
@@ -14,7 +14,7 @@
 * Choose between the various options using the arrow keys or numbered index.
 
 ## Demo
-//To Do
+[Demo Video Here](https://github.com/bradleyknutson/LIRI-Bot/blob/master/demo.mp4)
 
 ## Frameworks Used
 * ### npm
