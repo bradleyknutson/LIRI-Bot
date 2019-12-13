@@ -14,7 +14,7 @@ LIRI-Bot is a Language Interpretation and Recognition Interface bot, used exclus
 * Choose between the various options using the arrow keys or numbered index.
 
 ## Demo
-[Demo Video Here](https://github.com/bradleyknutson/LIRI-Bot/blob/master/demo.mp4)
+[Demo Video Here](https://drive.google.com/file/d/1uh4Kz60H6bgk-UN9s9v_6qkBtA4Qt9Tm/view?usp=sharing)
 
 ## Frameworks Used
 * ### npm
