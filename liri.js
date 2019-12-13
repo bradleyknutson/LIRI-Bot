@@ -16,6 +16,7 @@ function liriINIT(){
             choices: ['Search for concerts by Artist', 'Search for a song by the title', 'Search for a movie by the title', 'Do something random!', 'Exit']
         }
     ]).then(response => {
+        logData(`${moment().format()} ${response.command} selected`)
         switch(response.command){
             case 'Search for concerts by Artist':
                 concertThis();
@@ -34,7 +35,7 @@ function liriINIT(){
                 return;
         }
     }).catch(err => {
-        console.log(err);
+        logData(`${moment().format()} ${err}`);;
     });
 }
 
@@ -47,6 +48,7 @@ function spotifyThisSong(song){
             default: song || 'The Sign - Ace of Base',
         }
     ]).then(response => {
+        logData(`${moment().format()} ${response.song} Entered`);
         spotify.search({
             type: 'track',
             query: response.song,
@@ -66,12 +68,11 @@ function spotifyThisSong(song){
                 liriINIT();
             }
         }).catch(err => {
-            console.log(err);
+            logData(`${moment().format()} ${err}`);;
         });
     }).catch(err => {
-        console.log(err);
+        logData(`${moment().format()} ${err}`);;
     });
-    debugger;
 }
 
 function concertThis(artist){
@@ -83,6 +84,7 @@ function concertThis(artist){
             default: artist
         }
     ]).then(res => {
+        logData(`${moment().format()} ${res.artist} Entered`);
         var artist = res.artist.split(' ').join('+');
         axios.get('https://rest.bandsintown.com/artists/'+ artist + '/events?app_id=codingbootcamp').then(res => {
             console.log(res);
@@ -97,9 +99,11 @@ function concertThis(artist){
             }
         }).catch(err => {
             console.log(err.response.data.errorMessage);
+            logData(`${moment().format()} ${err.response.data.errorMessage}`);
+            liriINIT();
         })
     }).catch(err => {
-        console.log(err);
+        logData(`${moment().format()} ${err}`);
     });
 }
 
@@ -112,33 +116,41 @@ function movieThis(movie){
             default: movie || "Mr. Nobody"
         }
     ]).then(res => {
+        logData(`${moment().format()} ${res.movie} Entered`);
         var movieSearch = res.movie.split(' ').join('+');
-        var movieTitle = "Mr. Nobody";
+        var movieTitle = "";
         axios.get("http://www.omdbapi.com/?apikey=3cb42b54&s=" + movieSearch).then(res => {
             movieTitle = res.data.Search[0].Title;
         }).catch(err =>{
-            console.log(err);
+            logData(`${moment().format()} ${err}`);
         }).finally(() => {
-            axios.get("http://www.omdbapi.com/?apikey=3cb42b54&t=" + movieTitle).then(res => {
-                var movie = res.data;
-                var movieData = [
-                    `Title: ${movie.Title}`,
-                    `Year: ${movie.Year}`,
-                    `IMDB Rating: ${movie.Ratings[0] ? movie.Ratings[0].Value : "None"}`,
-                    `Rotten Tomatoes Rating: ${movie.Ratings[1] ? movie.Ratings[1].Value : "None"}`,
-                    `Country: ${movie.Country}`,
-                    `Language: ${movie.Language}`,
-                    `Plot: ${movie.Plot}`,
-                    `Actors: ${movie.Actors}`
-                ].join("\n");
-                console.log("```````````````\n" + movieData + "\n```````````````");
+            if(movieTitle !== ""){
+                axios.get("http://www.omdbapi.com/?apikey=3cb42b54&t=" + movieTitle).then(res => {
+                    var movie = res.data;
+                    var movieData = [
+                        `Title: ${movie.Title}`,
+                        `Year: ${movie.Year}`,
+                        `IMDB Rating: ${movie.Ratings[0] ? movie.Ratings[0].Value : "None"}`,
+                        `Rotten Tomatoes Rating: ${movie.Ratings[1] ? movie.Ratings[1].Value : "None"}`,
+                        `Country: ${movie.Country}`,
+                        `Language: ${movie.Language}`,
+                        `Plot: ${movie.Plot}`,
+                        `Actors: ${movie.Actors}`
+                    ].join("\n");
+                    console.log("```````````````\n" + movieData + "\n```````````````");
+                    liriINIT();
+                }).catch(err =>{
+                    logData(`${moment().format()} ${err}`);
+                });
+            }else{
+                console.log('No movie exists with that name');
+                logData('No movie exists with that name');
                 liriINIT();
-            }).catch(err =>{
-                console.log(err);
-            });
+            }
+
         });
     }).catch(err =>{
-        console.log(err);
+        logData(`${moment().format()} ${err}`);
     });
 }
 
@@ -163,4 +175,11 @@ function doWhatItSays(){
     });
 }
 
+function logData(message){
+    fs.appendFile('log.txt', `\n${message}`, 'utf8', (err) => {
+        if(err) throw err;
+    });
+}
+
+logData(`LIRI Loaded`);
 liriINIT();
