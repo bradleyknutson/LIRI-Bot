@@ -81,7 +81,7 @@ function concertThis(artist){
             name: 'artist',
             message: "What artist do you want to search for?",
             type: "input",
-            default: artist
+            default: artist || "Amon Amarth"
         }
     ]).then(res => {
         logData(`${moment().format()} ${res.artist} Entered`);
