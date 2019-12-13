@@ -87,7 +87,6 @@ function concertThis(artist){
         logData(`${moment().format()} ${res.artist} Entered`);
         var artist = res.artist.split(' ').join('+');
         axios.get('https://rest.bandsintown.com/artists/'+ artist + '/events?app_id=codingbootcamp').then(res => {
-            console.log(res);
             if(res.data.length > 0){
                 res.data.forEach(concert => {
                     console.log("\n```````````````\nVenue Name: " + concert.venue.name + "\nVenue Location: " + concert.venue.city + "\nDate: " + moment(concert.datetime).format("dddd, MMMM Do YYYY, h:mm:ss a") + "\n\n```````````````\n");
@@ -157,7 +156,7 @@ function movieThis(movie){
 function doWhatItSays(){
     fs.readFile('random.txt', 'utf8', (err, data) => {
         if(err) throw err;
-        var commandLines = data.split('\r\n');
+        var commandLines = data.split('\n');
         var randomCommand = commandLines[Math.floor(Math.random() * commandLines.length)];
         var commandArgs = randomCommand.split(',');
         var command = commandArgs[0];
